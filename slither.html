@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeoSlither</title>
+  <style>
+    :root {
+      --bg: #0b0f1a;
+      --panel: #12172a;
+      --accent: #e63946;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      background: radial-gradient(1200px 800px at 50% 20%, #11162a, var(--bg));
+      color: var(--text);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .ui {
+      width: 300px;
+      background: linear-gradient(180deg, var(--panel), #0d1224);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      border-right: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .panel {
+      background: rgba(255,255,255,0.04);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.05s ease, filter 0.15s ease;
+    }
+
+    button:hover { filter: brightness(1.1); }
+    button:active { transform: scale(0.98); }
+
+    .hint {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    canvas {
+      flex: 1;
+      display: block;
+      background: #0b0f1a;
+    }
+  </style>
+</head>
+<body>
+  <div class="ui">
+    <div>
+      <div class="title">NeoSlither</div>
+      <div class="subtitle">A modern slither-style arcade game</div>
+    </div>
+
+    <div class="panel">
+      <div class="stat"><span>Length</span><span id="length">10</span></div>
+      <div class="stat"><span>Score</span><span id="score">0</span></div>
+    </div>
+
+    <button id="restart">Restart Game</button>
+
+    <div class="panel hint">
+      Move your mouse to steer.<br />
+      Eat glowing orbs to grow.<br />
+      Avoid hitting yourself or the walls.
+    </div>
+  </div>
+
+  <canvas id="game"></canvas>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const lengthEl = document.getElementById('length');
+    const scoreEl = document.getElementById('score');
+    const restartBtn = document.getElementById('restart');
+
+    function resize() {
+      canvas.width = window.innerWidth - 300;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const WORLD = { width: 4000, height: 4000 };
+
+    let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+    canvas.addEventListener('mousemove', e => {
+      mouse.x = e.clientX - 300;
+      mouse.y = e.clientY;
+    });
+
+    let snake, pellets, score, gameOver;
+
+    function resetGame() {
+      snake = {
+        segments: [{ x: 0, y: 0 }],
+        angle: 0,
+        speed: 2.2,
+        size: 8,
+        length: 10
+      };
+
+      pellets = [];
+      for (let i = 0; i < 600; i++) spawnPellet();
+
+      score = 0;
+      gameOver = false;
+    }
+
+    function spawnPellet() {
+      pellets.push({
+        x: Math.random() * WORLD.width - WORLD.width / 2,
+        y: Math.random() * WORLD.height - WORLD.height / 2,
+        r: 3 + Math.random() * 2
+      });
+    }
+
+    resetGame();
+    restartBtn.onclick = resetGame;
+
+    function update() {
+      if (gameOver) return;
+
+      const head = snake.segments[0];
+      const dx = mouse.x - canvas.width / 2;
+      const dy = mouse.y - canvas.height / 2;
+      snake.angle = Math.atan2(dy, dx);
+
+      const nx = head.x + Math.cos(snake.angle) * snake.speed;
+      const ny = head.y + Math.sin(snake.angle) * snake.speed;
+      snake.segments.unshift({ x: nx, y: ny });
+
+      while (snake.segments.length > snake.length) snake.segments.pop();
+
+      // Eat pellets
+      for (let i = pellets.length - 1; i >= 0; i--) {
+        const p = pellets[i];
+        const dist = Math.hypot(nx - p.x, ny - p.y);
+        if (dist < snake.size + p.r) {
+          pellets.splice(i, 1);
+          spawnPellet();
+          snake.length += 1;
+          score += 10;
+        }
+      }
+
+      // Self collision
+      for (let i = 10; i < snake.segments.length; i++) {
+        const s = snake.segments[i];
+        if (Math.hypot(nx - s.x, ny - s.y) < snake.size) {
+          gameOver = true;
+        }
+      }
+
+      lengthEl.textContent = snake.length;
+      scoreEl.textContent = score;
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const camX = snake.segments[0].x - canvas.width / 2;
+      const camY = snake.segments[0].y - canvas.height / 2;
+
+      // Pellets
+      ctx.fillStyle = '#ffd166';
+      for (const p of pellets) {
+        ctx.beginPath();
+        ctx.arc(p.x - camX, p.y - camY, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Snake
+      for (let i = snake.segments.length - 1; i >= 0; i--) {
+        const s = snake.segments[i];
+        ctx.beginPath();
+        ctx.arc(s.x - camX, s.y - camY, snake.size, 0, Math.PI * 2);
+        ctx.fillStyle = i === 0 ? '#e63946' : '#9b2226';
+        ctx.fill();
+      }
+
+      if (gameOver) {
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'white';
+        ctx.font = '32px Inter, Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
+      }
+    }
+
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    loop();
+  </script>
+</body>
+</html>

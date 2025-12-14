@@ -1,0 +1,106 @@
+/* BACKGROUND */
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0b2545, #1e3a8a);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #1f2933;
+}
+
+/* NAV */
+.glass-nav {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.nav-link {
+  color: #f8fafc !important;
+  margin-left: 1rem;
+}
+
+/* HERO */
+.hero-section {
+  padding: 5rem 0 3rem;
+}
+
+.hero-card {
+  padding: 3rem;
+}
+
+/* GLASS CARD */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+}
+
+/* PROFILE IMAGE */
+.profile-img {
+  width: 100%;
+  max-width: 260px;
+  border-radius: 14px;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+}
+
+/* TEXT */
+.hero-name {
+  font-size: 3rem;
+  font-weight: 600;
+  color: #0b2545;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  color: #475569;
+}
+
+.hero-text {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin-top: 1rem;
+}
+
+/* BUTTONS */
+.btn-glass-primary {
+  background-color: #0b2545;
+  color: white;
+  border-radius: 10px;
+  padding: 0.6rem 1.4rem;
+}
+
+.btn-glass-primary:hover {
+  background-color: #163a6b;
+}
+
+.btn-glass-outline {
+  border: 1px solid #0b2545;
+  color: #0b2545;
+  border-radius: 10px;
+  padding: 0.6rem 1.4rem;
+}
+
+.btn-glass-outline:hover {
+  background-color: #0b2545;
+  color: white;
+}
+
+/* INFO SECTION */
+.info-section {
+  padding: 3rem 0 4rem;
+}
+
+.info-section h5 {
+  color: #0b2545;
+  margin-bottom: 0.75rem;
+}
+
+/* FOOTER */
+.footer-glass {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 1.5rem 0;
+  color: #f8fafc;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
